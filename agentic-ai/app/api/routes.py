@@ -30,7 +30,7 @@ async def handle_query(req: QueryRequest, x_correlation_id: Optional[str] = Head
         "messages": [HumanMessage(content=req.message)],
         "correlation_id": corr_id,
         "errors": []
-    })
+    }, config={"configurable": {"thread_id": req.session_id}})
     
     last_message = state["messages"][-1] if state.get("messages") else None
     raw_content = last_message.content if last_message else "Execution complete"

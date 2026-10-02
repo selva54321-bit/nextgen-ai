@@ -19,6 +19,8 @@ def should_continue(state: AgentState) -> str:
         return "tools"
     return END
 
+from langgraph.checkpoint.memory import MemorySaver
+
 def build_graph():
     workflow = StateGraph(AgentState)
     workflow.add_node("agent", call_model)
@@ -35,4 +37,5 @@ def build_graph():
     )
     workflow.add_edge("tools", "agent")
     
-    return workflow.compile()
+    memory = MemorySaver()
+    return workflow.compile(checkpointer=memory)

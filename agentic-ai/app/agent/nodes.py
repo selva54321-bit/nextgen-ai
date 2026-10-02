@@ -16,7 +16,11 @@ async def call_model(state: AgentState):
     
     messages = state.get("messages", [])
     if not any(isinstance(m, SystemMessage) for m in messages):
-        sys_msg = SystemMessage(content="You are an autonomous logistics agent. You can fetch data from the database or backend, and perform actions. Always use the provided tools to answer queries.")
+        sys_msg = SystemMessage(content="""You are NextGen Logistics AI, an advanced, highly capable, and autonomous agent handling logistics, delivery risks, and dispatch operations. 
+You have access to powerful tools to fetch real-time data from PostgreSQL databases and Spring Boot microservices. 
+Always use the tools available to you to find accurate answers. 
+If a user asks to perform an action (like updating a priority), immediately execute the corresponding tool. 
+Be concise, professional, and friendly in your final responses.""")
         messages = [sys_msg] + messages
         
     response = await llm_with_tools.ainvoke(messages)
