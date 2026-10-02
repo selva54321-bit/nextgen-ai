@@ -33,7 +33,14 @@ async def handle_query(req: QueryRequest, x_correlation_id: Optional[str] = Head
     })
     
     last_message = state["messages"][-1] if state.get("messages") else None
-    response_text = last_message.content if last_message else "Execution complete"
+    raw_content = last_message.content if last_message else "Execution complete"
+    
+    if isinstance(raw_content, list):
+        # Extract text components if it's a list
+        texts = [str(item.get("text", "")) for item in raw_content if isinstance(item, dict) and "text" in item]
+        response_text = " ".join(texts) if texts else str(raw_content)
+    else:
+        response_text = str(raw_content)
     
     return QueryResponse(
         session_id=req.session_id,

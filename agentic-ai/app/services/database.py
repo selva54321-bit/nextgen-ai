@@ -13,13 +13,13 @@ class ReadOnlyDatabaseService:
             return result.mappings().all()
 
     async def count_orders(self):
-        result = await self._execute_query("SELECT count(*) as count FROM v_orders")
+        result = await self._execute_query("SELECT count(*) as count FROM orders")
         return result[0]['count'] if result else 0
 
     async def count_dispatch_ready_orders(self):
-        result = await self._execute_query("SELECT count(*) as count FROM v_dispatch_queue WHERE dispatch_ready = true")
+        result = await self._execute_query("SELECT count(*) as count FROM dispatch_assignments WHERE status = 'PENDING'")
         return result[0]['count'] if result else 0
         
     async def count_high_priority_orders(self):
-        result = await self._execute_query("SELECT count(*) as count FROM v_dispatch_queue WHERE priority_tier = 'HIGH'")
+        result = await self._execute_query("SELECT count(*) as count FROM orders WHERE status = 'PRIORITY'")
         return result[0]['count'] if result else 0

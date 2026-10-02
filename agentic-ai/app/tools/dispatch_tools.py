@@ -6,10 +6,12 @@ get_dispatch_queue_meta = ToolMetadata(name="get_dispatch_queue", operation="REA
 
 @tool
 async def get_dispatch_queue(correlation_id: str) -> dict:
-    """Gets the current dispatch queue"""
-    client = BackendClient()
+    """Gets the current dispatch queue from the database"""
+    from ..services.database import ReadOnlyDatabaseService
+    db = ReadOnlyDatabaseService()
     try:
-        return await client.get_dispatch_queue(correlation_id)
+        count = await db.count_dispatch_ready_orders()
+        return {"dispatch_ready_orders": count, "message": f"{count} orders are waiting in the queue."}
     except Exception as e:
         return {"error": str(e)}
 
@@ -17,9 +19,11 @@ get_priority_orders_meta = ToolMetadata(name="get_priority_orders", operation="R
 
 @tool
 async def get_priority_orders(correlation_id: str) -> dict:
-    """Gets high priority orders"""
-    client = BackendClient()
+    """Gets high priority orders from the database"""
+    from ..services.database import ReadOnlyDatabaseService
+    db = ReadOnlyDatabaseService()
     try:
-        return await client.get_priority_orders(correlation_id)
+        count = await db.count_high_priority_orders()
+        return {"high_priority_orders": count, "message": f"{count} high priority orders found."}
     except Exception as e:
         return {"error": str(e)}
