@@ -1,0 +1,4 @@
+station_code,route_date,zone_id,executor_capacity,route_num_stops,stop_package_count,stop_total_volume,stop_avg_volume,total_service_time,has_time_window,window_duration_sec,window_start_hour,window_end_hour,first_attempt_failure,dow,date
+3313071,26-08-2018,C-7.1E,160,259,1,9522.19200,9522.19200,70,0,0,,0,6,26-08-2018
+3313071,26-08-2018,C-7.2E,160,259,2,18682.32,9341.16,105,0,0,,0,6,26-08-2018
+3313071,26-08-2018,C-7.3E,160,259,19,94141.2229,4954.80121,644.099999,1,86340,7,6.98333333,0,6,26-08-2018
