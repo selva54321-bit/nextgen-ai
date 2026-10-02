@@ -1,0 +1,12 @@
+spring.application.name=AI-NextGen-Hacks
+spring.datasource.url=jdbc:postgresql://<DB_HOST>:<DB_PORT>/<DB_NAME>?user=<DB_USERNAME>&password=<DB_PASSWORD>
+spring.datasource.username=<DB_USERNAME>
+spring.datasource.password=<DB_PASSWORD>
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.show-sql=true
+
+# Ignore spring security by default for api
+spring.security.user.name=<SECURITY_USERNAME>
+spring.security.user.password=<SECURITY_PASSWORD>
