@@ -4,9 +4,7 @@ export const nav = [
   ['/', 'Command center', '⌂'],
   ['/warehouse', 'Warehouse & priority', '▦'],
   ['/dispatch', 'Dispatch units', '⇢'],
-  ['/delivery', 'Routes & risk', '⌖'],
-  ['/whatsapp', 'Customer WhatsApp', '◉'],
-  ['/journey', 'Order 360 journey', '↗'],
+  ['/ai-assistant', 'AI Assistant', '◉'],
 ]
 
 export function Shell({ children, title }) {

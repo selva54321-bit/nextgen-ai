@@ -23,4 +23,5 @@ export const api = {
   dispatchPlan: payload => request('/api/v1/dispatch/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }),
   dispatchBatch: file => upload('/api/v1/dispatch/plan-batch', file),
   stopRisk: stopId => request(`/api/v1/delivery/stops/${encodeURIComponent(stopId)}/risk`),
+  getDashboardData: () => request('/api/v1/dispatch/data', { method: 'GET' }),
 }

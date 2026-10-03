@@ -1,130 +1,131 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { api } from '../api/client.js'
 import { Badge, Heading, Panel } from '../components/ui'
 import { Shell } from '../components/Layout/Shell'
 
 export default function DispatchPage() {
-  const [chatInput, setChatInput] = useState('');
-  const [messages, setMessages] = useState([
-    { sender: 'System', text: 'Detected High Risk for ORD-1042. Initiating WhatsApp confirmation flow...', type: 'system' },
-    { sender: 'System', text: 'WhatsApp message triggered via Twilio. Awaiting customer reply...', type: 'system' },
-    { sender: 'Customer', text: 'Yes, I am available.', type: 'user' },
-    { sender: 'AI', text: 'Status updated automatically. Delivery confirmed! Route has been optimized.', type: 'ai' }
-  ]);
+  const [batches, setBatches] = useState(null)
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  const handleChat = (e) => {
-    e.preventDefault();
-    if (!chatInput.trim()) return;
-    setMessages([...messages, { sender: 'You', text: chatInput, type: 'user' }]);
-    setChatInput('');
-    setTimeout(() => {
-        setMessages(prev => [...prev, { sender: 'AI', text: 'I am monitoring the network and will update systems automatically.', type: 'ai' }]);
-    }, 1000);
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await api.getDashboardData();
+        setBatches(response);
+      } catch (e) {
+        if (e.message.includes('Failed to fetch')) {
+           setError("Backend isn't running");
+        } else {
+           setError(e.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const stats = useMemo(() => {
+    if (!batches) return null;
+    const allOrders = Object.values(batches).flat();
+    let high = 0, med = 0, low = 0;
+    allOrders.forEach(o => {
+      const risk = o.delivery?.riskBand || 'UNKNOWN';
+      if (risk === 'HIGH') high++;
+      else if (risk === 'MEDIUM') med++;
+      else low++;
+    });
+    const total = allOrders.length;
+    
+    // Find worst order for factors
+    const worstOrder = allOrders.sort((a,b) => (b.delivery?.failureProbability || 0) - (a.delivery?.failureProbability || 0))[0];
+
+    return {
+       high, med, low, total,
+       highPct: Math.round((high/total)*100),
+       medPct: Math.round((med/total)*100),
+       lowPct: Math.round((low/total)*100),
+       worstOrder
+    };
+  }, [batches]);
 
   return (
     <Shell title="Dispatch & Risk Analysis">
       <Heading
         eyebrow="AI DELIVERY PREDICTION"
         title="Dispatch Control Center"
-        description="Analyze delivery risks and coordinate automated WhatsApp interventions."
+        description="Analyze delivery risks based on advanced ML models."
       />
 
-      {/* Top: Risk breakdown */}
-      <div className="metric-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', marginTop: '2rem' }}>
-        <Panel>
-          <span className="metric-label">HIGH RISK</span>
-          <b className="metric-value" style={{ color: '#d93025' }}>15%</b>
-          <span className="metric-note">24 Orders</span>
-        </Panel>
-        <Panel>
-          <span className="metric-label">MEDIUM RISK</span>
-          <b className="metric-value" style={{ color: '#f29900' }}>30%</b>
-          <span className="metric-note">48 Orders</span>
-        </Panel>
-        <Panel>
-          <span className="metric-label">LOW RISK</span>
-          <b className="metric-value" style={{ color: '#1e8e3e' }}>55%</b>
-          <span className="metric-note">88 Orders</span>
-        </Panel>
-      </div>
+      {error && (
+         <Panel style={{ marginTop: '2rem', marginBottom: '2rem', border: '2px solid #d93025' }}>
+           <h2 style={{ color: '#d93025', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              ⚠️ Backend isn't running
+           </h2>
+           <p style={{ marginTop: '0.5rem' }}>The Spring Boot backend could not be reached. Please ensure the backend server is running on port 8080.</p>
+         </Panel>
+      )}
 
-      {/* Center: Risk Card */}
-      <Panel style={{ marginTop: '2rem' }}>
-        <p className="eyebrow">RISK ANALYSIS</p>
-        <h2>Delivery Risk Details</h2>
-        <div style={{ display: 'flex', gap: '3rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
-           <div style={{ flex: 1, minWidth: '250px' }}>
-             <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-               Risk Score: <span style={{ color: '#d93025' }}>0.072 (HIGH)</span>
-             </h3>
-             <p style={{ color: '#555', lineHeight: '1.5' }}>
-               Failure probability is elevated for recent batches. The ML model predicts potential delivery failures if no intervention is taken.
-             </p>
-             <Badge tone="red" style={{ marginTop: '1rem' }}>REQUIRES INTERVENTION</Badge>
-           </div>
-           <div style={{ flex: 1, minWidth: '250px', background: '#f8f9fa', padding: '1.5rem', borderRadius: '8px' }}>
-             <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: '#333' }}>Top 3 Risk Factors:</h3>
-             <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', paddingLeft: '1.2rem', color: '#444' }}>
-               <li><b>route_num_stops:</b> Too many stops on the route</li>
-               <li><b>total_service_time:</b> Exceeds SLA delivery window</li>
-               <li><b>has_time_window:</b> Strict deadline constraints</li>
-             </ul>
-           </div>
-        </div>
-      </Panel>
+      {loading && !error && (
+        <Panel style={{ marginTop: '2rem' }}>
+           <p>Syncing risk data...</p>
+        </Panel>
+      )}
 
-      {/* Finally: AI Assistant */}
-      <Panel style={{ marginTop: '2rem', border: '1px solid #e0e0e0' }}>
-        <p className="eyebrow">AI ASSISTANT</p>
-        <h2>Autonomous WhatsApp Resolutions</h2>
-        <p className="panel-copy">The AI agent automatically triggers WhatsApp messages for appropriate reasons and updates the backend.</p>
-        
-        <div style={{ 
-          background: '#f8f9fa', 
-          padding: '1.5rem', 
-          borderRadius: '8px', 
-          minHeight: '250px', 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: '1rem',
-          marginTop: '1.5rem',
-          maxHeight: '400px',
-          overflowY: 'auto'
-        }}>
-           {messages.map((msg, i) => (
-             <div key={i} style={{ 
-               alignSelf: msg.type === 'user' ? 'flex-end' : 'flex-start', 
-               background: msg.type === 'user' ? '#1a73e8' : (msg.type === 'ai' ? '#e8f0fe' : '#e0e0e0'), 
-               color: msg.type === 'user' ? 'white' : '#202124', 
-               padding: '0.75rem 1.25rem', 
-               borderRadius: '12px',
-               maxWidth: '80%',
-               fontSize: '0.95rem'
-             }}>
-                <b style={{ display: 'block', fontSize: '0.8rem', opacity: 0.8, marginBottom: '0.2rem' }}>{msg.sender}</b>
-                {msg.text}
-             </div>
-           ))}
-        </div>
-        
-        <form onSubmit={handleChat} style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
-           <input 
-             type="text" 
-             value={chatInput}
-             onChange={(e) => setChatInput(e.target.value)}
-             placeholder="Type a command to the AI Assistant..." 
-             style={{ 
-               flex: 1, 
-               padding: '0.75rem 1rem', 
-               borderRadius: '6px', 
-               border: '1px solid #ccc',
-               fontSize: '1rem'
-             }} 
-           />
-           <button type="submit" className="button primary" style={{ padding: '0 2rem' }}>Send</button>
-        </form>
-      </Panel>
+      {stats && !error && (
+        <>
+          {/* Top: Risk breakdown */}
+          <div className="metric-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', marginTop: '2rem' }}>
+            <Panel>
+              <span className="metric-label">HIGH RISK</span>
+              <b className="metric-value" style={{ color: '#d93025' }}>{stats.highPct}%</b>
+              <span className="metric-note">{stats.high} Orders</span>
+            </Panel>
+            <Panel>
+              <span className="metric-label">MEDIUM RISK</span>
+              <b className="metric-value" style={{ color: '#f29900' }}>{stats.medPct}%</b>
+              <span className="metric-note">{stats.med} Orders</span>
+            </Panel>
+            <Panel>
+              <span className="metric-label">LOW RISK</span>
+              <b className="metric-value" style={{ color: '#1e8e3e' }}>{stats.lowPct}%</b>
+              <span className="metric-note">{stats.low} Orders</span>
+            </Panel>
+          </div>
+
+          {/* Center: Risk Card */}
+          <Panel style={{ marginTop: '2rem' }}>
+            <p className="eyebrow">RISK ANALYSIS</p>
+            <h2>Delivery Risk Details</h2>
+            {stats.worstOrder ? (
+               <div style={{ display: 'flex', gap: '3rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+                 <div style={{ flex: 1, minWidth: '250px' }}>
+                   <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
+                     Risk Score: <span style={{ color: '#d93025' }}>{stats.worstOrder.delivery?.failureProbability} ({stats.worstOrder.delivery?.riskBand})</span>
+                   </h3>
+                   <p style={{ color: '#555', lineHeight: '1.5' }}>
+                     Failure probability is elevated for order {stats.worstOrder.orderId}. The ML model predicts potential delivery failures if no intervention is taken.
+                   </p>
+                   {stats.worstOrder.delivery?.riskBand === 'HIGH' && (
+                     <Badge tone="red" style={{ marginTop: '1rem' }}>REQUIRES INTERVENTION</Badge>
+                   )}
+                 </div>
+                 <div style={{ flex: 1, minWidth: '250px', background: '#f8f9fa', padding: '1.5rem', borderRadius: '8px' }}>
+                   <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: '#333' }}>Top 3 Risk Factors:</h3>
+                   <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', paddingLeft: '1.2rem', color: '#444' }}>
+                     {stats.worstOrder.delivery?.topFactors?.map((f, i) => (
+                        <li key={i}><b>{f}</b></li>
+                     ))}
+                   </ul>
+                 </div>
+              </div>
+            ) : (
+               <p>No orders to analyze.</p>
+            )}
+          </Panel>
+        </>
+      )}
     </Shell>
   )
 }
