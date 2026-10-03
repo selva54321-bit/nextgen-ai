@@ -42,7 +42,12 @@ public class DispatchController {
                     System.err.println("Error processing row: " + e.getMessage());
                 }
             }
-            return ResponseEntity.ok(responses);
+            
+            // Group the responses by batch/Dispatch Unit ID for the frontend
+            java.util.Map<String, java.util.List<DispatchPlanResponse>> groupedBatches = responses.stream()
+                .collect(java.util.stream.Collectors.groupingBy(DispatchPlanResponse::dispatchUnitId));
+                
+            return ResponseEntity.ok(groupedBatches);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("An error occurred: " + e.getMessage());
         }

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Badge, Heading, Journey, Panel } from '../components/ui'
+import { Badge, Heading, Panel } from '../components/ui'
 import { Shell } from '../components/Layout/Shell'
 
 export default function DashboardPage() {
@@ -12,7 +12,7 @@ export default function DashboardPage() {
         action={<Badge tone="green">● SYSTEM READY</Badge>}
       />
 
-      <div className="metric-grid">
+      <div className="metric-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '2rem' }}>
         <Panel>
           <span className="metric-label">WAREHOUSE</span>
           <b className="metric-value">Picking → ready</b>
@@ -35,9 +35,7 @@ export default function DashboardPage() {
         </Panel>
       </div>
 
-      <Journey compact />
-
-      <div className="dashboard-grid">
+      <div className="dashboard-grid" style={{ marginTop: '3rem' }}>
         <Panel>
           <div className="panel-head">
             <div>
@@ -45,15 +43,6 @@ export default function DashboardPage() {
               <h2>Goods to dispatch</h2>
             </div>
             <Link to="/warehouse" className="text-link">Open warehouse →</Link>
-          </div>
-          <div className="flow-mini">
-            <span>Orders & goods</span>
-            <b>→</b>
-            <span>Picking wave</span>
-            <b>→</b>
-            <span>AI priority</span>
-            <b>→</b>
-            <span>Dispatch unit</span>
           </div>
           <p className="panel-copy">
             Upload and validate warehouse data, run the picking simulation, or request ranked tasks.
@@ -68,22 +57,13 @@ export default function DashboardPage() {
             </div>
             <Link to="/delivery" className="text-link">Open routes →</Link>
           </div>
-          <div className="flow-mini">
-            <span>Route & stops</span>
-            <b>→</b>
-            <span>Risk score</span>
-            <b>→</b>
-            <span>WhatsApp</span>
-            <b>→</b>
-            <span>Re-rank</span>
-          </div>
           <p className="panel-copy">
             Check a stop against the trained risk model, then coordinate customer availability and delivery options.
           </p>
         </Panel>
       </div>
 
-      <Panel className="notice">
+      <Panel className="notice" style={{ marginTop: '2rem' }}>
         <span className="notice-mark">i</span>
         <p>
           <b>Data integrity:</b> shipment identifiers above are a walkthrough example. Network totals and customer outcomes appear only when supplied by connected services.

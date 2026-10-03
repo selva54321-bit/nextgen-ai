@@ -5,127 +5,108 @@ import { Badge, Heading, Panel, Result } from '../components/ui'
 import { Shell } from '../components/Layout/Shell'
 
 export default function WarehousePage() {
-  const [file, setFile] = useState(null)
   const [result, setResult] = useState(null)
-  const [busy, setBusy] = useState(false)
-
-  const run = async (action) => {
-    setBusy(true)
-    setResult(null)
-
-    try {
-      if (action === 'upload') {
-        if (!file) throw new Error('Choose a CSV or Excel file first.')
-        setResult(await api.warehouseUpload(file))
-      } else if (action === 'simulation') {
-        setResult(await api.warehouseSimulation())
-      } else {
-        setResult(await api.taskRanking())
-      }
-    } catch (e) {
-      setResult({ error: e.message })
-    } finally {
-      setBusy(false)
-    }
+  
+  const handleDepart = (batchId) => {
+     alert(`Vehicle for batch ${batchId} has departed for delivery!`);
   }
 
   return (
     <Shell title="Warehouse & priority">
       <Heading
         eyebrow="LAYER 1 · WAREHOUSE"
-        title="Goods, picking and priority"
-        description="Prepare warehouse data, inspect picking operations, and move ready orders toward dispatch."
+        title="Dynamic Batching & Waveless Picking"
+        description="Real-time order priority ranking and dynamic vehicle batching."
       />
 
-      <div className="warehouse-banner">
-        <div>
-          <p className="eyebrow">ACTIVE PICKING WAVE</p>
-          <h2>
-            W-43175 <Badge tone="red">CRITICAL PRIORITY</Badge>
-          </h2>
-          <p>Example shipment ORD-1042 · 3 warehouse locations · dispatch handoff DU-03</p>
+      <div style={{ display: 'flex', gap: '2rem', marginTop: '2rem', alignItems: 'flex-start' }}>
+        {/* Left Side: Priority Queue */}
+        <div style={{ width: '35%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <Panel>
+            <p className="eyebrow">PRIORITY QUEUE</p>
+            <h2>Ranked Orders</h2>
+            <p className="panel-copy">Sorted based on real-time priority score and SLA</p>
+            
+            <div className="queue-item" style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Badge tone="red">CRITICAL</Badge>
+              <span style={{ flex: 1 }}>
+                <b>ORD-1042</b>
+                <br /><small>Priority Score: 98</small>
+              </span>
+            </div>
+            
+            <div className="queue-item" style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Badge tone="orange">HIGH</Badge>
+              <span style={{ flex: 1 }}>
+                <b>ORD-2091</b>
+                <br /><small>Priority Score: 85</small>
+              </span>
+            </div>
+            
+            <div className="queue-item" style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Badge tone="blue">NORMAL</Badge>
+              <span style={{ flex: 1 }}>
+                <b>ORD-3310</b>
+                <br /><small>Priority Score: 45</small>
+              </span>
+            </div>
+            
+            <div className="queue-item" style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Badge tone="blue">NORMAL</Badge>
+              <span style={{ flex: 1 }}>
+                <b>ORD-4102</b>
+                <br /><small>Priority Score: 30</small>
+              </span>
+            </div>
+          </Panel>
         </div>
-        <Link className="button secondary" to="/journey">View order journey</Link>
-      </div>
 
-      <div className="work-grid">
-        <Panel>
-          <div className="section-title">
-            <span className="step-num">01</span>
-            <h2>Upload warehouse dataset</h2>
-          </div>
-          <p className="panel-copy">Validate the customer orders, product, storage location, strategy, and navigation inputs.</p>
-          <label className="file-picker">
-            Choose CSV or Excel dataset
-            <input type="file" accept=".csv,.xls,.xlsx" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-          </label>
-          {file && <p className="file-name">Selected: {file.name}</p>}
-          <button className="button primary" disabled={busy} type="button" onClick={() => run('upload')}>
-            {busy ? 'Working…' : 'Upload and validate'}
-          </button>
-        </Panel>
-
-        <Panel>
-          <div className="section-title">
-            <span className="step-num">02</span>
-            <h2>Picking operations</h2>
-          </div>
-          <p className="panel-copy">Run the warehouse simulation or ask the service for its current task ranking.</p>
-          <div className="button-stack">
-            <button className="button primary" disabled={busy} type="button" onClick={() => run('simulation')}>
-              Run warehouse simulation
-            </button>
-            <button className="button secondary" disabled={busy} type="button" onClick={() => run('ranking')}>
-              Retrieve task ranking
-            </button>
-          </div>
-        </Panel>
-      </div>
-
-      <div className="warehouse-lower">
-        <Panel>
-          <p className="eyebrow">WAREHOUSE MAP · SCHEMATIC</p>
-          <h2>Picking locations</h2>
-          <p className="panel-copy">Location occupancy and picker paths populate from warehouse service data.</p>
-          <div className="warehouse-map">
-            {['A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'B3', 'B4', 'C1', 'C2', 'C3', 'C4'].map((x, i) => (
-              <div className={i === 1 || i === 6 || i === 9 ? 'map-cell selected' : ''} key={x}>
-                {x}
-                <small>{i === 1 ? 'A-1.2D' : i === 6 ? 'P-13.2A' : i === 9 ? 'P-12.3C' : 'Storage'}</small>
+        {/* Right Side: Batches / Vehicles */}
+        <div style={{ width: '65%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <Heading eyebrow="BATCHES" title="Vehicles Ready for Dispatch" />
+          
+          <div className="unit-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            
+            {/* Batch 1 */}
+            <Panel className="unit-card" style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="panel-head">
+                <h2>Vehicle 1 (DU-01)</h2>
+                <Badge tone="orange">LOADING</Badge>
               </div>
-            ))}
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: '1rem 0' }}>Contains:</p>
+                <ul style={{ paddingLeft: '1.2rem', marginBottom: '1.5rem' }}>
+                   <li>ORD-1042</li>
+                   <li>ORD-2091</li>
+                </ul>
+              </div>
+              <button className="button primary" onClick={() => handleDepart('DU-01')} style={{ width: '100%' }}>
+                Vehicle has departed for delivery
+              </button>
+            </Panel>
+            
+            {/* Batch 2 */}
+            <Panel className="unit-card" style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="panel-head">
+                <h2>Vehicle 2 (DU-02)</h2>
+                <Badge tone="green">READY</Badge>
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: '1rem 0' }}>Contains:</p>
+                <ul style={{ paddingLeft: '1.2rem', marginBottom: '1.5rem' }}>
+                   <li>ORD-3310</li>
+                   <li>ORD-4102</li>
+                </ul>
+              </div>
+              <button className="button primary" onClick={() => handleDepart('DU-02')} style={{ width: '100%' }}>
+                Vehicle has departed for delivery
+              </button>
+            </Panel>
+            
           </div>
-        </Panel>
-
-        <Panel>
-          <p className="eyebrow">PRIORITY QUEUE</p>
-          <h2>Next picking tasks</h2>
-          <p className="panel-copy">The live task ranking is returned by the warehouse model.</p>
-          <div className="queue-item">
-            <Badge tone="red">CRITICAL</Badge>
-            <span>
-              <b>ORD-1042</b>
-              <small>3 locations · sample</small>
-            </span>
-            <Link to="/journey">↗</Link>
-          </div>
-          <div className="queue-item">
-            <Badge tone="orange">URGENT</Badge>
-            <span>
-              <b>Awaiting live ranking</b>
-              <small>Run task ranking to populate</small>
-            </span>
-          </div>
-          <div className="tag-list">
-            <span>Orders</span>
-            <span>Waves</span>
-            <span>Storage locations</span>
-            <span>Navigation points</span>
-          </div>
-        </Panel>
+        </div>
       </div>
 
-      <Result value={result} />
     </Shell>
   )
 }

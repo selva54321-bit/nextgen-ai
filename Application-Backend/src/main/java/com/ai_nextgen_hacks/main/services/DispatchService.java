@@ -41,8 +41,8 @@ public class DispatchService {
     private RestTemplate restTemplate;
 
     // FastAPI URLs (mocked for now, can be moved to application.properties)
-    private final String warehouseEngineUrl = "http://10.10.68.140:8001/v1/priorities/rank";
-    private final String deliveryEngineUrl = "http://10.10.68.140:8000/predict";
+    private final String warehouseEngineUrl = "http://172.16.241.106:8001/v1/priorities/rank";
+    private final String deliveryEngineUrl = "http://172.16.241.106:8000/predict";
 
     public DispatchPlanResponse planDispatch(DispatchPlanRequest request) {
         String planningId = "PLAN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
