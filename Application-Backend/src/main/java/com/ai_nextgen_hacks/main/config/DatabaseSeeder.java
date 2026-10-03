@@ -1,33 +1,23 @@
 package com.ai_nextgen_hacks.main.config;
 
-import com.ai_nextgen_hacks.main.models.DispatchUnit;
-import com.ai_nextgen_hacks.main.models.Order;
-import com.ai_nextgen_hacks.main.repos.DispatchUnitRepository;
-import com.ai_nextgen_hacks.main.repos.OrderRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.time.LocalDateTime;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 public class DatabaseSeeder {
 
     @Bean
-    public CommandLineRunner initData(OrderRepository orderRepository, DispatchUnitRepository dispatchUnitRepository) {
+    public CommandLineRunner fixDbConstraints(JdbcTemplate jdbcTemplate) {
         return args -> {
-            if (orderRepository.count() == 0) {
-                Order order1 = new Order("ORD-1042", "CUST-001", LocalDateTime.now(), "PENDING", LocalDateTime.now().plusDays(2));
-                orderRepository.save(order1);
-                
-                DispatchUnit unit1 = new DispatchUnit();
-                unit1.setUnitId("DU-03");
-                unit1.setCapacity(100.0);
-                unit1.setAvailability("AVAILABLE");
-                unit1.setCurrentLocation("ZONE-A");
-                dispatchUnitRepository.save(unit1);
-                
-                System.out.println("Mock data seeded!");
+            System.out.println("Executing SQL to fix recommendations_recommendation_type_check...");
+            try {
+                jdbcTemplate.execute("ALTER TABLE recommendations DROP CONSTRAINT IF EXISTS recommendations_recommendation_type_check;");
+                jdbcTemplate.execute("ALTER TABLE recommendations ADD CONSTRAINT recommendations_recommendation_type_check CHECK (recommendation_type IN ('CONFIRM_AVAILABILITY', 'NO_INTERVENTION', 'REROUTE', 'EXPEDITE', 'STANDARD_NOTIFICATION'));");
+                System.out.println("SQL fix executed successfully!");
+            } catch (Exception e) {
+                System.err.println("Error executing SQL fix: " + e.getMessage());
             }
         };
     }
