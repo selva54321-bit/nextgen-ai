@@ -1,0 +1,50 @@
+services:
+  application_backend:
+    build:
+      context: ./Application-Backend
+    container_name: application_backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=${DATABASE_URL}
+      - SPRING_DATASOURCE_USERNAME=${DATABASE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DATABASE_PASSWORD}
+      - PYTHON_BACKEND_WAREHOUSE_URL=http://python_backend:8001/v1/priorities/rank
+      - PYTHON_BACKEND_DELIVERY_URL=http://python_backend:8000/predict
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_WHATSAPP_NUMBER=${TWILIO_WHATSAPP_NUMBER}
+      - WHATSAPP_PROVIDER=${WHATSAPP_PROVIDER}
+    networks:
+      - nextgen-network
+    depends_on:
+      - python_backend
+
+  python_backend:
+    build:
+      context: ./python_backend
+    container_name: python_backend
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    networks:
+      - nextgen-network
+
+  agentic_ai:
+    build:
+      context: ./agentic-ai
+    container_name: agentic_ai
+    ports:
+      - "8002:8002"
+    environment:
+      - SPRING_BOOT_BASE_URL=http://application_backend:8080
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DATABASE_URL=${AGENTIC_DB_URL}
+    networks:
+      - nextgen-network
+    depends_on:
+      - application_backend
+
+networks:
+  nextgen-network:
+    driver: bridge

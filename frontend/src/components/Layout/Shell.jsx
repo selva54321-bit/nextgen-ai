@@ -4,6 +4,7 @@ export const nav = [
   ['/', 'Command center', '⌂'],
   ['/warehouse', 'Warehouse & priority', '▦'],
   ['/dispatch', 'Dispatch units', '⇢'],
+  ['/tracking', 'Live Tracking', '◎'],
   ['/ai-assistant', 'AI Assistant', '◉'],
 ]
 

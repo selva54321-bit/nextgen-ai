@@ -1,0 +1,11 @@
+.git
+.gitignore
+.env
+target
+.mvn
+mvnw
+mvnw.cmd
+*.log
+.settings
+.project
+.classpath

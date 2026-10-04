@@ -2,7 +2,8 @@
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '')
 
 async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, options)
+  const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+  const response = await fetch(url, options);
   const body = await response.text()
   let data
   try { data = body ? JSON.parse(body) : null } catch { data = body }
@@ -24,4 +25,8 @@ export const api = {
   dispatchBatch: file => upload('/api/v1/dispatch/plan-batch', file),
   stopRisk: stopId => request(`/api/v1/delivery/stops/${encodeURIComponent(stopId)}/risk`),
   getDashboardData: () => request('/api/v1/dispatch/data', { method: 'GET' }),
+  getAllOrders: () => request('/api/v1/dispatch/orders', { method: 'GET' }),
+  getAllUnits: () => request('/api/v1/dispatch/units', { method: 'GET' }),
+  getUnitAssignments: () => request('/api/v1/dispatch/units/assignments', { method: 'GET' }),
+  chatAI: payload => request('http://172.16.242.105:8080/api/v1/agent/query', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }),
 }

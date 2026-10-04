@@ -3,6 +3,36 @@ import { api } from '../api/client.js'
 import { Badge, Heading, Panel } from '../components/ui'
 import { Shell } from '../components/Layout/Shell'
 
+const HighRiskOrderCard = ({ order }) => {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div 
+      onClick={() => setExpanded(!expanded)}
+      style={{ 
+        border: '1px solid #ffcccc', 
+        borderRadius: '8px', 
+        padding: '0.75rem', 
+        cursor: 'pointer',
+        background: expanded ? '#fff5f5' : '#fff',
+        transition: 'all 0.2s',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+      }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <b style={{ color: '#d93025', fontSize: '0.9rem' }}>{order.orderId}</b>
+        <Badge tone="red">{Math.round((order.delivery?.failureProbability || 0)*100)} Score</Badge>
+      </div>
+      {expanded && order.delivery?.topFactors && (
+        <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: '#555' }}>
+          <strong>Risk Factors:</strong>
+          <ul style={{ marginTop: '0.25rem', paddingLeft: '1.2rem', marginBottom: 0 }}>
+            {order.delivery.topFactors.map((f, i) => <li key={i}>{f}</li>)}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function WarehousePage() {
   const [batches, setBatches] = useState(null)
   const [error, setError] = useState(null)

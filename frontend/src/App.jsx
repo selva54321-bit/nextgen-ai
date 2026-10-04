@@ -5,6 +5,7 @@ import WarehousePage from './pages/WarehousePage.jsx'
 import DispatchPage from './pages/DispatchPage.jsx'
 import AIAssistantPage from './pages/AIAssistantPage.jsx'
 import LegalPage from './pages/LegalPage.jsx'
+import TrackingPage from './pages/TrackingPage.jsx'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/warehouse" element={<WarehousePage />} />
         <Route path="/dispatch" element={<DispatchPage />} />
         <Route path="/ai-assistant" element={<AIAssistantPage />} />
+        <Route path="/tracking" element={<TrackingPage />} />
         <Route path="/privacy" element={<LegalPage type="privacy" />} />
         <Route path="/terms" element={<LegalPage type="terms" />} />
         <Route path="*" element={<Navigate to="/" replace />} />

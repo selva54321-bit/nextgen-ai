@@ -40,9 +40,11 @@ public class DispatchService {
     @Autowired
     private RestTemplate restTemplate;
 
-    // FastAPI URLs (mocked for now, can be moved to application.properties)
-    private final String warehouseEngineUrl = "http://172.16.241.106:8001/v1/priorities/rank";
-    private final String deliveryEngineUrl = "http://172.16.241.106:8000/predict";
+    @org.springframework.beans.factory.annotation.Value("${python.warehouse.url:http://localhost:8001/v1/priorities/rank}")
+    private String warehouseEngineUrl;
+
+    @org.springframework.beans.factory.annotation.Value("${python.delivery.url:http://localhost:8000/predict}")
+    private String deliveryEngineUrl;
 
     public DispatchPlanResponse planDispatch(DispatchPlanRequest request) {
         String planningId = "PLAN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();

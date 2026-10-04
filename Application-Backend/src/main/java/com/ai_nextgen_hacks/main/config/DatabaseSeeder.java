@@ -15,6 +15,7 @@ public class DatabaseSeeder {
             try {
                 jdbcTemplate.execute("ALTER TABLE recommendations DROP CONSTRAINT IF EXISTS recommendations_recommendation_type_check;");
                 jdbcTemplate.execute("ALTER TABLE recommendations ADD CONSTRAINT recommendations_recommendation_type_check CHECK (recommendation_type IN ('CONFIRM_AVAILABILITY', 'NO_INTERVENTION', 'REROUTE', 'EXPEDITE', 'STANDARD_NOTIFICATION'));");
+                jdbcTemplate.execute("SELECT setval('recommendations_id_seq', COALESCE((SELECT MAX(id)+10000 FROM recommendations), 10000));");
                 System.out.println("SQL fix executed successfully!");
             } catch (Exception e) {
                 System.err.println("Error executing SQL fix: " + e.getMessage());

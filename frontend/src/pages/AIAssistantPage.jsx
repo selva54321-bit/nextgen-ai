@@ -44,14 +44,25 @@ export default function AIAssistantPage() {
     fetchData();
   }, []);
 
-  const handleChat = (e) => {
+  const handleChat = async (e) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
-    setMessages([...messages, { sender: 'You', text: chatInput, type: 'user' }]);
+    const message = chatInput.trim();
+    if (!message) return;
+    
+    setMessages(prev => [...prev, { sender: 'You', text: message, type: 'user' }]);
     setChatInput('');
-    setTimeout(() => {
-        setMessages(prev => [...prev, { sender: 'AI', text: 'I am monitoring the network and will update systems automatically.', type: 'ai' }]);
-    }, 1000);
+    
+    try {
+        const response = await api.chatAI({
+            session_id: "demo-session-123",
+            user_id: "admin",
+            message: message
+        });
+        
+        setMessages(prev => [...prev, { sender: 'Agentic AI', text: response.message, type: 'ai' }]);
+    } catch (err) {
+        setMessages(prev => [...prev, { sender: 'System', text: `Error connecting to Agentic AI (172.16.242.105): ${err.message}`, type: 'system' }]);
+    }
   }
 
   return (
